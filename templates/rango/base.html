@@ -1,24 +1,15 @@
 <!DOCTYPE html>
-{% load static %}
 {% load rango_template_tags %}
 
 <html>
     <head lang="en">
         <meta charset="UTF-8"/>
         <title>
-            Rango - 
-            {% block title_block %}
-                How To Tango with Django:
-            {% endblock %}
+            Homepage
         </title>
     </head>
 
     <body>
-        <div>
-            {% block body_block %}
-                {% get_category_list category %}
-            {% endblock %}
-        </div>
         <hr />
         {% block nav_block %}
        <ul>

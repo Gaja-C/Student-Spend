@@ -5,5 +5,10 @@ from rango import views
 app_name = 'rango'
 urlpatterns = [
     path('', views.index, name='index'),
-    path('about/', views.about, name='about'),
+    path('budget/', views.budget, name='budget'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('login/', views.login, name='login'),
+    path('registration/', views.registration, name='registration'),
+    path('expenses/', views.expenses, name='expenses'),
+    path('bill_splitting/', views.bill_splitting, name='bill-splitting'),
 ]
