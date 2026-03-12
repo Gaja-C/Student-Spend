@@ -5,6 +5,10 @@
 {% block nav_block %}{% endblock %}
 
 {% block content %}
+{% if registered %}
+You're already register. Please log in.
+<a href="{% url 'rango:login' %}">Return to the homepage.</a><br />
+{% else %}
 <h1>Create an account</h1>
 
 <form id="user_form" method="post" action="{% url 'rango:registration' %}" enctype="multipart/form-data">
@@ -18,4 +22,5 @@
     Already have an account?
     <a href="{% url 'rango:login' %}">Log in</a>
 </p>
+{% endif %}
 {% endblock %}
