@@ -1,8 +1,9 @@
-{% extends "base.html" %}
+{% extends "rango/base.html" %}
 
 {% block titleblock %}Register{% endblock %}
 
 {% block content %}
+{% block nav_block %}
 <h1>Create an account</h1>
 
 <form method="post" action=".">
@@ -14,6 +15,7 @@
 
 <p>
     Already have an account?
-    <a href="{% url 'auth_login' %}">Log in</a>
+    <a href="{% url 'rango:login' %}">Log in</a>
 </p>
+{% endblock %}
 {% endblock %}
