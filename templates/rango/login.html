@@ -1,14 +1,16 @@
-{% extends "base.html" %}
+{% extends "rango/base.html" %}
 
 {% block titleblock %}Login{% endblock %}
+
+{% block nav_block %}{% endblock %}
 
 {% block content %}
 <h1>Login</h1>
 
 <form method="post" action=".">
     {% csrf_token %}
-    {{ form.as_p }}
-
+    Username: <input type="text" name="username" size="50"/><br />
+    Password: <input type="password" name="password" size="50"/><br />
     <input type="submit" value="Log in">
     {% if next %}
         <input type="hidden" name="next" value="{{ next }}">
@@ -17,6 +19,6 @@
 
 <p>
     Not registered?
-    <a href="{% url 'registration_register' %}">Register here</a>
+    <a href="{% url 'rango:registration' %}">Register here</a>
 </p>
 {% endblock %}
