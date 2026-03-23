@@ -11,11 +11,11 @@
 
 <main>
     {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
+        <script>
+            for (const message of messages) {
+                alert("{{ message|escapejs }}");
+            }
+        </script>
     {% endif %}
 
     {% block content %}
@@ -29,9 +29,6 @@
         <ul>
             {% if user.is_authenticated %}
                 <li><a href="{% url 'rango:dashboard' %}">Dashboard</a></li>
-                <li><a href="{% url 'rango:expenses' %}">Expenses</a></li>
-                <li><a href="{% url 'rango:bill_splitting' %}">Bill splitting</a></li>
-                <li><a href="{% url 'rango:budget' %}">Budget</a></li>
                 <li><a href="{% url 'rango:logout' %}">Logout</a></li>
             {% else %}
                 <li><a href="{% url 'rango:login' %}">Login</a></li>
@@ -41,6 +38,19 @@
     </nav>
 </header>
 {% endblock %}
+
+{% if user.is_authenticated %}
+{% block money_block %}
+    <p>
+        Money: £{{ user.userprofile.money }} </br>
+        Want to add money?</br>
+        <a href="{% url 'rango:add_money' %}">Add Money</a></br>
+        Added too much money?</br>
+        <a href="{% url 'rango:remove_money' %}">Remove Money</a></br>
+    </p>
+
+{% endblock %}
+{% endif %}
 
 <footer>
     <p>&copy; {{ year|default:2026 }} StudentSpend</p>

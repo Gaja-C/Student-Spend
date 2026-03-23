@@ -6,8 +6,8 @@ from django.utils.translation import gettext_lazy as _
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    email = models.EmailField(_('email address'), unique=True)
     picture = models.ImageField(upload_to='profile_images', blank=True)
+    money = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return self.user.username

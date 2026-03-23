@@ -1,0 +1,31 @@
+{% extends "rango/base.html" %}
+
+{% block titleblock %}Add Money{% endblock %}
+
+{% block nav_block %}{% endblock %}
+
+{% block content %}
+<h1>Add Money</h1>
+<p>Current Money: £{{ user.userprofile.money }}</p>
+<form method="post" action=".">
+    {% csrf_token %}
+    Pounds: <input type="number" name="pounds" size="50" step="1" min="0"/><br />
+    Pence: <input type="number" name="pence" size="50" step="1" min="0" max="99"/><br />
+    <input type="submit" value="Add Money"><br />
+    {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+    {% endif %}
+</form>
+
+{% if messages %}
+  <script>
+    {% for message in messages %}
+      alert("{{ message }}");
+    {% endfor %}
+  </script>
+{% endif %}
+
+<a href="{% url 'rango:index' %}">Return to the homepage.</a>
+{% endblock %}
+
+{% block money_block %}{% endblock %}

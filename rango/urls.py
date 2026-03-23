@@ -12,4 +12,6 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path('expenses/', views.expenses, name='expenses'),
     path('bill_splitting/', views.bill_splitting, name='bill_splitting'),
+    path('add_money/', views.add_money, name="add_money"),
+    path('remove_money/', views.remove_money, name="remove_money"),
 ]

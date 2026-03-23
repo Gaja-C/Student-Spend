@@ -6,6 +6,8 @@ from django.contrib.auth import authenticate, login, logout
 from rango.models import UserProfile
 from rango.forms import UserForm, UserProfileForm
 from django.contrib.auth.decorators import login_required
+from decimal import Decimal
+from django.contrib import messages
 
 # Create your views here.
 def index(request):
@@ -77,3 +79,39 @@ def expenses(request):
 @login_required 
 def bill_splitting(request):
     return render(request, 'rango/bill-splitting.html')
+
+@login_required
+def add_money(request):
+    if request.method == 'POST':
+        pounds = request.POST.get('pounds')
+        pence = request.POST.get('pence').zfill(2)
+        try:
+            total = (pounds)+"."+(pence)
+            total = Decimal(total).quantize(Decimal("0.00"))
+            profile = request.user.userprofile
+            profile.money += total
+            profile.save()
+            return redirect(reverse('rango:index'))
+        except:
+            return HttpResponse("Invalid input supplied.")
+    return render(request, 'rango/add-money.html')
+
+@login_required
+def remove_money(request):
+    if request.method == 'POST':
+        pounds = request.POST.get('pounds')
+        pence = request.POST.get('pence').zfill(2)
+        try:
+            total = (pounds)+"."+(pence)
+            total = Decimal(total).quantize(Decimal("0.00"))
+            profile = request.user.userprofile
+            if total > profile.money:
+                messages.error(request, "Input must be less than money already stored.")
+                return redirect(reverse('rango:remove_money'))
+            else:
+                profile.money -= total
+                profile.save()
+                return redirect(reverse('rango:index'))
+        except:
+            messages.error(request, "Invalid input supplied.")
+    return render(request, 'rango/remove-money.html')
