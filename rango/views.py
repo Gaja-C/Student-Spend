@@ -5,10 +5,11 @@ from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from rango.models import UserProfile
 from rango.forms import UserForm, UserProfileForm
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def index(request):
-    return HttpResponse("Welcome to Student Spend! </br><a href='/rango/login/'>Log In</a></br><a href='/rango/register/'>Register</a></br><a href='/rango/about/'>About</a>")
+    return render(request, 'rango/index.html')
 
 def about(request):
     return HttpResponse("Rango says here is the about page. </br><a href='/rango/'>Index</a>")
@@ -55,15 +56,24 @@ def user_login(request):
             return HttpResponse("Invalid login details supplied.")
     else:
         return render(request, 'rango/login.html')
+
+@login_required
+def user_logout(request):
+    logout(request)
+    return redirect(reverse('rango:index'))
     
-def budget(response):
-    pass
+@login_required 
+def budget(request):
+    return render(request, 'rango/budget.html')
 
-def dashboard(response):
-    pass
+@login_required 
+def dashboard(request):
+    return render(request, 'rango/dashboard.html')
 
-def expenses(response):
-    pass
+@login_required 
+def expenses(request):
+    return render(request, 'rango/dashboard.html')
 
-def bill_splitting(response):
-    pass
+@login_required 
+def bill_splitting(request):
+    return render(request, 'rango/bill-splitting.html')

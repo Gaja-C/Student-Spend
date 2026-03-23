@@ -9,6 +9,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('login/', views.user_login, name='login'),
     path('registration/', views.registration, name='registration'),
+    path('logout/', views.user_logout, name='logout'),
     path('expenses/', views.expenses, name='expenses'),
-    path('bill_splitting/', views.bill_splitting, name='bill-splitting'),
+    path('bill_splitting/', views.bill_splitting, name='bill_splitting'),
 ]

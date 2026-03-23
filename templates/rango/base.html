@@ -8,6 +8,20 @@
 
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
+
+<main>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% block content %}
+    {% endblock %}
+</main>
+
 {% block nav_block %}
 <body>
 <header>
@@ -27,19 +41,6 @@
     </nav>
 </header>
 {% endblock %}
-
-<main>
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    {% block content %}
-    {% endblock %}
-</main>
 
 <footer>
     <p>&copy; {{ year|default:2026 }} StudentSpend</p>
