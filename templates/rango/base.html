@@ -11,11 +11,11 @@
 
 <main>
     {% if messages %}
-        <script>
-            for (const message of messages) {
-                alert("{{ message|escapejs }}");
-            }
-        </script>
+        {% for message in messages %}
+                <script>
+                    alert("{{message}}")
+                </script>
+        {% endfor %}
     {% endif %}
 
     {% block content %}

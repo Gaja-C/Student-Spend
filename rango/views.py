@@ -8,6 +8,8 @@ from rango.forms import UserForm, UserProfileForm
 from django.contrib.auth.decorators import login_required
 from decimal import Decimal
 from django.contrib import messages
+from .models import ExpenseCategory, Expense
+from datetime import date
 
 # Create your views here.
 def index(request):
@@ -74,7 +76,57 @@ def dashboard(request):
 
 @login_required 
 def expenses(request):
-    return render(request, 'rango/dashboard.html')
+    profile = request.user.userprofile
+
+    categories = ExpenseCategory.objects.filter(user=profile).order_by('lastAddedTo').values().reverse()
+    categories = categories[:3]
+    mostRecentData = []
+    for category in categories:
+        microExpenses = Expense.objects.filter(user=profile, category_id = category['id']).order_by('date').values().reverse()
+        microExpenses = microExpenses[:3]
+        mostRecentData.append({'category' : category, 'expenses' : microExpenses})
+
+    if request.method == 'POST':
+        action = request.POST.get("action")
+        if action == "add_category":
+            categoryName = request.POST.get('categoryName')
+            if (ExpenseCategory.objects.filter(user=profile, name=categoryName).exists()):
+                messages.error(request, "Category of same name already exists.")
+            else:
+                ExpenseCategory.objects.create(user=profile, name=categoryName)
+            return redirect(reverse('rango:expenses'))
+        elif action == "remove_category":
+            categoryName = request.POST.get('categoryName')
+            if (ExpenseCategory.objects.filter(user=profile, name=categoryName).exists()):
+                ExpenseCategory.objects.filter(user=profile, name=categoryName).delete()
+            else:
+                messages.error(request, "Chosen category does not exist.")
+        elif action == "add_expense":
+            expenseName = request.POST.get('expenseName')
+            categoryName = request.POST.get('categoryName')
+            amount = request.POST.get('amount')
+            dateOf = request.POST.get('date')
+            category = ExpenseCategory.objects.filter(user=profile, name=categoryName)
+            if category.exists():
+                if (Expense.objects.filter(user=profile, name=expenseName, category=category.get(), date=dateOf).exists()):
+                    messages.error(request, "Expense of same name and date already exists in chosen category.")
+                else:
+                    Expense.objects.create(user=profile, name=expenseName, category=category.get(), amount=amount, date=dateOf)
+            else:
+                messages.error(request, "Chosen expense does not exist.")
+        else:
+            expenseName = request.POST.get('expenseName')
+            categoryName = request.POST.get('categoryName')
+            dateOf = request.POST.get('date')
+            category = ExpenseCategory.objects.filter(user=profile, name=categoryName)
+            if category.exists():
+                if (Expense.objects.filter(user=profile, name=expenseName, category=category.get(), date=dateOf).exists()):
+                    Expense.objects.filter(user=profile, name=expenseName, category=category.get(), date=dateOf).delete()
+                else:
+                    messages.error(request, "Chosen expense does not exist.")
+            else:
+                messages.error(request, "Chosen category does not exist.")
+    return render(request, 'rango/expenses.html', {'mostRecentData' : mostRecentData},)
 
 @login_required 
 def bill_splitting(request):

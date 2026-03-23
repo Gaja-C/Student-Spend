@@ -1,6 +1,7 @@
 from django.urls import path
 from django.conf.urls import url
 from rango import views
+from django.contrib import admin
 
 app_name = 'rango'
 urlpatterns = [
