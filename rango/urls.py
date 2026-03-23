@@ -15,4 +15,5 @@ urlpatterns = [
     path('bill_splitting/', views.bill_splitting, name='bill_splitting'),
     path('add_money/', views.add_money, name="add_money"),
     path('remove_money/', views.remove_money, name="remove_money"),
+    path('view_all_expenses/', views.view_all_expenses, name="view_all_expenses"),
 ]

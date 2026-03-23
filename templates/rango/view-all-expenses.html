@@ -1,0 +1,27 @@
+{% extends "rango/base.html" %}
+
+{% block titleblock %}All Expenses{% endblock %}
+
+{% block nav_block %}{% endblock %}
+
+{% block content %}
+<h1>All Expenses</h1>
+{% for item in allData %}
+    <h3>{{ item.category.name }}</h3>
+    <ul>
+        {% for expense in item.expenses %}
+            <li>
+                {{ expense.name }} - £{{ expense.amount }} - {{ expense.date }}
+            </li>
+        {% empty %}
+            <li>No expenses in this category.</li>
+        {% endfor %}
+    </ul>
+{% empty %}
+    <p>No categories yet.</p>
+{% endfor %}
+<a href="{% url 'rango:dashboard' %}">Return to the dashboard.</a></br>
+<a href="{% url 'rango:expenses' %}">Return to expenses.</a>
+{% endblock %}
+
+{% block money_block %}{% endblock %}

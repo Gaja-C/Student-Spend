@@ -77,7 +77,6 @@ def dashboard(request):
 @login_required 
 def expenses(request):
     profile = request.user.userprofile
-
     categories = ExpenseCategory.objects.filter(user=profile).order_by('lastAddedTo').values().reverse()
     categories = categories[:3]
     mostRecentData = []
@@ -167,3 +166,12 @@ def remove_money(request):
         except:
             messages.error(request, "Invalid input supplied.")
     return render(request, 'rango/remove-money.html')
+
+def view_all_expenses(request):
+    profile = request.user.userprofile
+    categories = ExpenseCategory.objects.filter(user=profile).order_by('lastAddedTo').values().reverse()
+    allData = []
+    for category in categories:
+        microExpenses = Expense.objects.filter(user=profile, category_id = category['id']).order_by('date').values().reverse()
+        allData.append({'category' : category, 'expenses' : microExpenses})
+    return render(request, 'rango/view-all-expenses.html', {'allData' : allData},)
