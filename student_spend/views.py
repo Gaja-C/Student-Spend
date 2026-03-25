@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
-from student_spend.models import UserProfile
+from student_spend.models import UserProfile, User
 from student_spend.forms import UserForm, UserProfileForm
 from django.contrib.auth.decorators import login_required
 from decimal import Decimal
@@ -130,66 +130,127 @@ def expenses(request):
 @login_required 
 def bill_splitting(request):
     profile = request.user.userprofile
-    memberG = MemberOfGroup.objects.filter(user=profile, paid_of = False).order_by('group_name_for_user').values().reverse()
-    memberG = memberG[:5]
-    mostRecentData = []
-    groupmembers=[] #to display
-    for group in memberG:
-        groups = Group.objects.filter(memberG_Id = group['id']).order_by('date').values().reverse()
-        mostRecentData.append({'name' : memberG['group_name_for_user'], 'moneyPerUser' : groups['money_spent']})
-    
-
     if request.method == 'POST':
         action = request.POST.get("action")
-        
-        groupmembersProfile=[] 
         if action == "add_group":
             userCreatedGroupName = request.POST.get('userCreatedGroupName')
-            moneySpent = request.POST.get('moneySpent')
+            moneySpent = Decimal(request.POST.get('moneySpent'))
             if (MemberOfGroup.objects.filter(user=profile, group_name_for_user = userCreatedGroupName).exists()):
                 messages.error(request, "Group of same name already exists.")
             else:
-                groupmembers = request.POST.get('membersUsername')
-                moneyPerUser=moneySpent/(groupmembers.len()+1)
-                new_group=Group.objects.create(name=userCreatedGroupName, money_spent=moneyPerUser)
+                groupmembers = request.POST.getlist('members')
+                moneyPerUser=moneySpent/Decimal(len(groupmembers)+1)
 
-                for member in groupmembers:# is there a sepreate user id or id it onley the username
-                    alsoMemberin=MemberOfGroup.objects.filter(user=member, paid_of = False ).order_by('lastAddedTo').values().reverse() 
-                    membersNameForGroup=userCreatedGroupName
-                    if (alsoMemberin['group_name_for_user'] == userCreatedGroupName):
-                        membersNameForGroup=membersNameForGroup+"1"
-                    MemberOfGroup.objects.create(group=new_group.id,group_name_for_user=membersNameForGroup, money_spent=moneyPerUser)
-            groupmembers=[]
-            groupmembersProfile=[]
-            return redirect(reverse('student_spend:bill-splitting'))
-        
+                #Check all fields are valid before making group
+                for memberUsername in groupmembers:# is there a sepreate user id or id it onley the username
+                    if (not(User.objects.filter(username=memberUsername).exists())):
+                        messages.error(request, "User, " + memberUsername +", does not exist. Could not make group")
+                else:
+                    new_group=Group.objects.create(name=userCreatedGroupName, money_per_user=moneyPerUser, total_money=moneySpent)
+                    MemberOfGroup.objects.create(user=profile, group=new_group,group_name_for_user=userCreatedGroupName, groupAdmin=True)
+                    for memberUsername in groupmembers:
+                        userMember = User.objects.filter(username=memberUsername)
+                        userMemberProfile = UserProfile.objects.get(user=userMember.get())
+                        addMember(userMemberProfile, new_group, userCreatedGroupName)
         
         elif action == "add_member": #we need to ad a way to get the user ID from the username dodnt know if it works
-            groupmember = request.POST.get('membersUsername')
-            groupmemberUserP = UserProfile.objects.filter(user__username = groupmember).first()
+            memberUsername = request.POST.get('membersUsername')
+            groupName = request.POST.get('groupName')
+            if (not(MemberOfGroup.objects.get(user=profile, group_name_for_user=groupName).groupAdmin)):
+                messages.error(request, "You are not an admin of " + groupName +". Only the creator of the group can add members")
+            elif (not(User.objects.filter(username=memberUsername)).exists()):
+                messages.error(request, "User, " + memberUsername +", does not exist. Could not add to group")
 
-            if (groupmemberUserP):
-                if (groupmemberUserP in groupmembers):
-                    messages.error(request, "Member has been already added.")
-                else:
-                    groupmembersProfile.append(groupmemberUserP)
-                    groupmembers.append({'groupmember' : groupmember})
+            elif (not(MemberOfGroup.objects.filter(user=profile, group_name_for_user=groupName)).exists()):
+                messages.error(request, "You are not a member of a group called " + groupName)
+
             else:
-                messages.error(request, "Memeber could not be found")
+                userMember = User.objects.filter(username=memberUsername)
+                userMemberProfile = UserProfile.objects.get(user=userMember.get())
+                memberGroup = MemberOfGroup.objects.get(user=profile, group_name_for_user=groupName).group
+                if (MemberOfGroup.objects.filter(user=userMemberProfile, group=memberGroup).exists()):
+                    messages.error(request, memberUsername + " is already in " + groupName +". Could npt add to group")
+                else:
+                    addMember(userMemberProfile, memberGroup, groupName)
+                    memberGroup.money_per_user = memberGroup.total_money / Decimal(memberGroup.numberOfUsers)
+                    memberGroup.save()
 
-        elif action == "clear_members": 
-            groupmembers=[]          
+        elif action == "remove_member":
+            memberUsername = request.POST.get('membersUsername')
+            groupName = request.POST.get('groupName')
+            if (not(MemberOfGroup.objects.get(user=profile, group_name_for_user=groupName).groupAdmin)):
+                messages.error(request, "You are not an admin of " + groupName +". Only the creator of the group can remove members")
+            elif (not(User.objects.filter(username=memberUsername)).exists()):
+                messages.error(request, "User, " + memberUsername +", does not exist. Could not remove from group")
 
-        elif action == "add_tranceaction": 
-            nameForGroup = request.POST.get('group_name_for_user')
-            groupTransaction= request.POST.get('transaction') 
+            elif (not(MemberOfGroup.objects.filter(user=profile, group_name_for_user=groupName)).exists()):
+                messages.error(request, "You are not a member of a group called " + groupName )
 
-            if (groupTransaction.numeric()):
-                group= MemberOfGroup.objects.filter(user=profile, group_name_for_user = nameForGroup).first()
-                moneyForT= Group.objects.filter(group=group.id)
-                Group.objects.filter(group=group.id).update(money_spent=moneyForT['money_spent']+groupTransaction)
+            else:
+                userMember = User.objects.filter(username=memberUsername)
+                userMemberProfile = UserProfile.objects.get(user=userMember.get())
+                memberGroup = MemberOfGroup.objects.get(user=profile, group_name_for_user=groupName).group
+                if (not(MemberOfGroup.objects.filter(user=userMemberProfile, group=memberGroup).exists())):
+                    messages.error(request, memberUsername + " is not in " + groupName +". Could not remove for group")
+                else:
+                    MemberOfGroup.objects.filter(user=userMemberProfile, group=memberGroup).delete()
+                    memberGroup.numberOfUsers -= 1
+                    memberGroup.money_per_user = memberGroup.total_money / Decimal(memberGroup.numberOfUsers)
+                    memberGroup.save()
 
-    return render(request, 'student_spend/bill-splitting.html', {'mostRecentData' : mostRecentData, 'groupmembers' : groupmembers},)
+        elif action == "delete_group":
+            groupName = request.POST.get('groupName')
+            if (not(MemberOfGroup.objects.get(user=profile, group_name_for_user=groupName).groupAdmin)):
+                messages.error(request, "You are not an admin of " + groupName +". Only the creator of the group can remove members")
+            elif (not(MemberOfGroup.objects.filter(user=profile, group_name_for_user=groupName)).exists()):
+                messages.error(request, "You are not a member of a group called " + groupName)
+            else:
+                group = MemberOfGroup.objects.get(user=profile, group_name_for_user=groupName).group
+                group.delete()
+
+        elif action == "add_transaction": 
+            nameForGroup = request.POST.get('groupName')
+            groupTransaction = Decimal(request.POST.get('transaction')) 
+
+            if (groupTransaction):
+                memberOfGroup= MemberOfGroup.objects.get(user=profile, group_name_for_user = nameForGroup)
+                moneyForT= Group.objects.get(id=memberOfGroup.group_id)
+                if (moneyForT.money_per_user <= groupTransaction):
+                    memberOfGroup.paid_off = True
+                memberOfGroup.money_spent = memberOfGroup.money_spent + groupTransaction
+                memberOfGroup.save()
+
+    memberG = MemberOfGroup.objects.filter(user=profile, paid_off = False).order_by('group_name_for_user').values().reverse()
+    memberG = memberG[:5]
+    mostRecentData = []
+    for memberGroup in memberG:
+        group = Group.objects.get(id=memberGroup['group_id'])
+        otherMembers = MemberOfGroup.objects.filter(group_id=memberGroup['group_id']).exclude(user=profile)
+        mostRecentData.append({'name' : memberGroup['group_name_for_user'], 'money_spent' : memberGroup['money_spent'], 'money_per_user' : group.money_per_user, 'other_members' : otherMembers})
+
+
+    return render(request, 'student_spend/bill-splitting.html', {'mostRecentData' : mostRecentData},)
+
+def addMember(userProfile, group, groupName):
+    alsoMemberIn=MemberOfGroup.objects.filter(user=userProfile, paid_off = False ).order_by('lastPayment').values().reverse() 
+    membersNameForGroup=groupName
+    if alsoMemberIn and (alsoMemberIn['group_name_for_user'] == groupName):
+        if (membersNameForGroup[-1].isDigit()):
+            membersNameForGroup=checkNumber(membersNameForGroup, -1)
+        else:
+            membersNameForGroup=membersNameForGroup+"1"
+    MemberOfGroup.objects.create(user=userProfile,group=group,group_name_for_user=membersNameForGroup)
+    group.numberOfUsers = group.numberOfUsers + 1
+    group.save()
+
+def checkNumber(string, numberChecker):
+    if (string[numberChecker-1].isdigit() and int(string[numberChecker]) == 9):
+        string = checkNumber(string, numberChecker-1)
+    elif (int(string[numberChecker]) == 9):
+        string = string[:numberChecker]+"10"+string[numberChecker:]
+    else:
+        string = string[:numberChecker]+str(int(string[numberChecker])+1)+string[numberChecker+1:]
+    return string
 
 @login_required
 def add_money(request):
