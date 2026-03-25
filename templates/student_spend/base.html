@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 
+<body>
 <main>
     {% if messages %}
         {% for message in messages %}
@@ -23,17 +24,21 @@
 </main>
 
 {% block nav_block %}
-<body>
 <header>
-    <nav>
-        <ul>
-            {% if user.is_authenticated %}
-                <li><a href="{% url 'rango:dashboard' %}">Dashboard</a></li>
-                <li><a href="{% url 'rango:logout' %}">Logout</a></li>
+    <nav class="navbar">
+        <div class="logo">StudentSpend</div>
+
+        <ul class="nav-links">
+            {% if request.path != "/" %}
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'student_spend:dashboard' %}">Dashboard</a></li>
+                    <li><a href="{% url 'student_spend:logout' %}">Logout</a></li>
             {% else %}
-                <li><a href="{% url 'rango:login' %}">Login</a></li>
-                <li><a href="{% url 'rango:registration' %}">Register</a></li>
-            {% endif %}
+                <li><a href="{% url 'student_spend:login' %}">Login</a></li>
+                <li><a href="{% url 'student_spend:registration' %}">Register</a></li>
+        {% endif %}
+    {% endif %}
+</ul>
         </ul>
     </nav>
 </header>
@@ -44,9 +49,9 @@
     <p>
         Money: £{{ user.userprofile.money }} </br>
         Want to add money?</br>
-        <a href="{% url 'rango:add_money' %}">Add Money</a></br>
+        <a href="{% url 'student_spend:add_money' %}">Add Money</a></br>
         Added too much money?</br>
-        <a href="{% url 'rango:remove_money' %}">Remove Money</a></br>
+        <a href="{% url 'student_spend:remove_money' %}">Remove Money</a></br>
     </p>
 
 {% endblock %}

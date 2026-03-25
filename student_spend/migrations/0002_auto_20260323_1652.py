@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rango', '0001_initial'),
+        ('student_spend', '0001_initial'),
     ]
 
     operations = [
@@ -40,14 +40,14 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('group_name_for_user', models.CharField(max_length=128)),
-                ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rango.Group')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rango.UserProfile')),
+                ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='student_spend.Group')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='student_spend.UserProfile')),
             ],
         ),
         migrations.AddField(
             model_name='group',
             name='members',
-            field=models.ManyToManyField(through='rango.MemberOfGroup', to='rango.UserProfile'),
+            field=models.ManyToManyField(through='student_spend.MemberOfGroup', to='student_spend.UserProfile'),
         ),
         migrations.CreateModel(
             name='Goal',
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                 ('budget', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
                 ('current_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
                 ('date', models.DateField()),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rango.UserProfile')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='student_spend.UserProfile')),
             ],
         ),
         migrations.CreateModel(
@@ -67,8 +67,8 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=128)),
                 ('amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
                 ('date', models.DateField()),
-                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rango.ExpenseCategory')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rango.UserProfile')),
+                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='student_spend.ExpenseCategory')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='student_spend.UserProfile')),
             ],
         ),
         migrations.AddConstraint(

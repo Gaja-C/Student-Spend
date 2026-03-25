@@ -1,4 +1,4 @@
-{% extends "rango/base.html" %}
+{% extends "student_spend/base.html" %}
 
 {% block titleblock %}Expenses{% endblock %}
 
@@ -64,8 +64,8 @@
 {% empty %}
     <p>No categories yet.</p>
 {% endfor %}
-<a href="{% url 'rango:view_all_expenses' %}">View all.</a></br>
-<a href="{% url 'rango:dashboard' %}">Return to the dashboard.</a>
+<a href="{% url 'student_spend:view_all_expenses' %}">View all.</a></br>
+<a href="{% url 'student_spend:dashboard' %}">Return to the dashboard.</a>
 
 <script>
 function confirmDeleteCategory() {

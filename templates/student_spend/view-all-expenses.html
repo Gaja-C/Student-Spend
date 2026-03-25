@@ -1,4 +1,4 @@
-{% extends "rango/base.html" %}
+{% extends "student_spend/base.html" %}
 
 {% block titleblock %}All Expenses{% endblock %}
 
@@ -20,8 +20,8 @@
 {% empty %}
     <p>No categories yet.</p>
 {% endfor %}
-<a href="{% url 'rango:dashboard' %}">Return to the dashboard.</a></br>
-<a href="{% url 'rango:expenses' %}">Return to expenses.</a>
+<a href="{% url 'student_spend:dashboard' %}">Return to the dashboard.</a></br>
+<a href="{% url 'student_spend:expenses' %}">Return to expenses.</a>
 {% endblock %}
 
 {% block money_block %}{% endblock %}

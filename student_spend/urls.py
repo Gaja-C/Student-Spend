@@ -1,9 +1,9 @@
 from django.urls import path
-from django.conf.urls import url
-from rango import views
+from django.urls import path
+from student_spend import views
 from django.contrib import admin
 
-app_name = 'rango'
+app_name = 'student_spend' #we should probaby chnage that name 
 urlpatterns = [
     path('', views.index, name='index'),
     path('budget/', views.budget, name='budget'),

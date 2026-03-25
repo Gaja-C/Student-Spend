@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-import mysql.connector
+#import mysql.connector
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rango',
+    'student_spend',
 ]
 
 MIDDLEWARE = [
@@ -135,4 +135,4 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = MEDIA_DIR
 
 #Users
-LOGIN_URL = '/rango/login/'
+LOGIN_URL = '/student_spend/login/'

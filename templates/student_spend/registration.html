@@ -1,0 +1,40 @@
+{% extends "student_spend/base.html" %}
+
+{% block titleblock %}Register{% endblock %}
+
+{% block nav_block %}{% endblock %}
+
+{% block content %}
+<section class="landing-page">
+    <div class="hero-card">
+
+        {% if registered %}
+            <h1 class="hero-title">Account Created</h1>
+            <p class="hero-subtitle">Your account has been created successfully.</p>
+
+            <p class="form-links">
+                <a href="{% url 'student_spend:login' %}">Log in</a><br>
+                <a href="{% url 'student_spend:index' %}">Return to homepage</a>
+            </p>
+        {% else %}
+            <h1 class="hero-title">Register</h1>
+            <p class="hero-subtitle">Create your StudentSpend account</p>
+
+            <form id="user_form" method="post" action="{% url 'student_spend:registration' %}" enctype="multipart/form-data" class="login-form">
+                {% csrf_token %}
+                {{ user_form.as_p }}
+                {{ profile_form.as_p }}
+                
+                <button type="submit" class="btn">Register</button>
+            </form>
+
+            <p class="form-links">
+                Already have an account?
+                <a href="{% url 'student_spend:login' %}">Log in</a><br>
+                <a href="{% url 'student_spend:index' %}">Return to homepage</a>
+            </p>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}

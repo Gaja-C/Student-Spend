@@ -7,13 +7,13 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rango', '0002_auto_20260323_1652'),
+        ('student_spend', '0002_auto_20260323_1652'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='expensecategory',
             name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='rango.UserProfile'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='student_spend.UserProfile'),
         ),
     ]

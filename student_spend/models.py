@@ -46,8 +46,9 @@ class Goal(models.Model):
 class MemberOfGroup(models.Model): # if the name given by one person already exists for another member of the group the name should be able to get a different identifier for the user 
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     group = models.ForeignKey("Group", on_delete=models.CASCADE)
-    group_name_for_user = models.CharField(max_length=128) 
-
+    group_name_for_user = models.CharField(max_length=128)
+    paid_of = models.BooleanField(default=False) # the user has paid off their part chnage to true
+    
     class Meta:
         constraints = [
             models.UniqueConstraint(  # this part works with the ID so a person is not twice added to the group

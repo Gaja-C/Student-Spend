@@ -1,0 +1,18 @@
+{% extends "student_spend/base.html" %}
+
+{% block titleblock %}Dashboard{% endblock %}
+
+{% block nav_block %}{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+<p>
+    <ul>
+    <li><a href="{% url 'student_spend:expenses' %}">Expenses</a></li>
+    <li><a href="{% url 'student_spend:bill_splitting' %}">Bill splitting</a></li>
+    <li><a href="{% url 'student_spend:budget' %}">Budget</a></li>
+    <li><a href="{% url 'student_spend:index' %}">Return to the homepage.</a></li>
+    <li><a href="{% url 'student_spend:logout' %}">Logout</a></li>
+    </ul>
+</p>
+{% endblock %}

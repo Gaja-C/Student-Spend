@@ -1,0 +1,26 @@
+{% extends "student_spend/base.html" %}
+
+{% block titleblock %}Welcome to StudentSpend{% endblock %}
+
+{% block nav_block %}{% endblock %}
+
+{% block content %}
+<section class="landing-page">
+    <div class="hero-card">
+        <h1 class="hero-title">StudentSpend</h1>
+        <p class="hero-subtitle">
+            Smart budgeting for student life. Track your money, manage spending, and stay in control.
+        </p>
+
+        {% if user.is_authenticated %}
+            <a class="btn" href="{% url 'student_spend:dashboard' %}">Go to Dashboard</a>
+            <a class="btn" href="{% url 'student_spend:logout' %}">Logout</a>
+        {% else %}
+            <div class="hero-buttons">
+                <a class="btn" href="{% url 'student_spend:login' %}">Login</a>
+                <a class="btn btn-secondary" href="{% url 'student_spend:registration' %}">Register</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

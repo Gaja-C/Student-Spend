@@ -1,0 +1,35 @@
+{% extends "student_spend/base.html" %}
+
+{% block titleblock %}Login{% endblock %}
+
+{% block nav_block %}{% endblock %}
+
+{% block content %}
+<section class="landing-page">
+    <div class="hero-card">
+
+        <h1 class="hero-title">Login</h1>
+        <p class="hero-subtitle">Access your StudentSpend account</p>
+
+        <form method="post" action="." class="login-form">
+            {% csrf_token %}
+
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <button type="submit" class="btn">Log in</button>
+        </form>
+
+        <p class="form-links">
+            Not registered?
+            <a href="{% url 'student_spend:registration' %}">Register here</a><br>
+            <a href="{% url 'student_spend:index' %}">Return to homepage</a>
+        </p>
+
+    </div>
+</section>
+{% endblock %}
