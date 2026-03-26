@@ -8,8 +8,8 @@ from student_spend.forms import UserForm, UserProfileForm
 from django.contrib.auth.decorators import login_required
 from decimal import Decimal
 from django.contrib import messages
-from .models import ExpenseCategory, Expense ,MemberOfGroup,Group
-from datetime import date
+from .models import ExpenseCategory, Expense ,MemberOfGroup,Group, Goal
+from datetime import date, datetime
 
 # Create your views here.
 def index(request):
@@ -68,7 +68,41 @@ def user_logout(request):
     
 @login_required 
 def budget(request):
-    return render(request, 'student_spend/budget.html')
+    profile = request.user.userprofile
+    if request.method == "POST":
+        action = request.POST.get("action")
+        if action == "add_goal":
+            goalName = request.POST.get("goalName")
+            date = request.POST.get("date")
+            if (Goal.objects.filter(user=profile, name=goalName).exists()):
+                messages.error(request, "Goal of same name already exists. Please give this goal a more unique name")
+            else:
+                budget = request.POST.get("amount")
+                Goal.objects.create(user=profile, name=goalName, budget=budget, current_amount=0, date=date)
+        elif action == "remove_goal":
+            goalName = request.POST.get("goalName")
+            date = request.POST.get("date")
+            if (not(Goal.objects.filter(user=profile, name=goalName, date=date).exists())):
+                messages.error(request, "Goal of entered name and date does not exist. Could not remove this goal.")
+            else:
+                Goal.objects.get(user=profile, name=goalName, date=date).delete()
+        elif action == "edit_goal":
+            goalName = request.POST.get("goalName")
+            addOrSub = Decimal(request.POST.get("amount"))
+            goal = Goal.objects.get(user=profile, name=goalName)
+            newTotal = goal.current_amount + addOrSub
+            if newTotal < 0:
+                messages.error(request, "Cannot remove more money than possible. Please enter a valid value to subtract")
+            else:
+                if newTotal >= goal.budget:
+                    goal.delete()
+                else:
+                    goal.current_amount = newTotal
+                    goal.save()
+
+    goals = Goal.objects.filter(user=profile).order_by('date')
+    mostRecentData = goals.values()[:3]
+    return render(request, 'student_spend/budget.html', {'goals' : goals, 'mostRecentData' : mostRecentData},)
 
 @login_required 
 def dashboard(request):
@@ -218,6 +252,7 @@ def bill_splitting(request):
                 if (moneyForT.money_per_user <= groupTransaction):
                     memberOfGroup.paid_off = True
                 memberOfGroup.money_spent = memberOfGroup.money_spent + groupTransaction
+                memberOfGroup.lastPayment = datetime.now
                 memberOfGroup.save()
 
     memberG = MemberOfGroup.objects.filter(user=profile, paid_off = False).order_by('group_name_for_user').values().reverse()
@@ -263,7 +298,7 @@ def add_money(request):
             profile = request.user.userprofile
             profile.money += total
             profile.save()
-            return redirect(reverse('student_spend:index'))
+            return redirect(reverse('student_spend:dashboard'))
         except:
             return HttpResponse("Invalid input supplied.")
     return render(request, 'student_spend/add-money.html')
@@ -283,7 +318,7 @@ def remove_money(request):
             else:
                 profile.money -= total
                 profile.save()
-                return redirect(reverse('student_spend:index'))
+                return redirect(reverse('student_spend:dashboard'))
         except:
             messages.error(request, "Invalid input supplied.")
     return render(request, 'student_spend/remove-money.html')

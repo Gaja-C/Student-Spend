@@ -163,3 +163,118 @@ main {
 .form-links a:hover {
     text-decoration: underline;
 }
+
+.dashboard-links {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.dashboard-links .btn {
+    width: 100%;
+    text-align: center;
+}
+
+.secondary-links {
+    margin-top: 30px;
+    font-size: 0.95rem;
+}
+
+.secondary-links a {
+    display: block;
+    color: #355c4b;
+    text-decoration: none;
+    margin-top: 8px;
+    font-weight: 600;
+}
+
+.secondary-links a:hover {
+    text-decoration: underline;
+}
+
+.dashboard-grid-modern {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 40px;
+    margin-top: 30px;
+    align-items: stretch;
+}
+
+.dashboard-info-card,
+.dashboard-action-card {
+    min-height: 110px;
+    border-radius: 14px;
+    border: 2px solid #355c4b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    box-sizing: border-box;
+    padding: 20px;
+}
+
+.dashboard-info-card {
+    background: #9fd58a;
+    color: white;
+}
+
+.dashboard-action-card {
+    background: white;
+    color: #355c4b;
+    transition: all 0.2s ease;
+}
+
+.dashboard-action-card:hover {
+    background: #355c4b;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.dashboard-footer-links {
+    margin-top: 30px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dashboard-footer-links a {
+    color: #355c4b;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.dashboard-footer-links a:hover {
+    text-decoration: underline;
+}
+
+.money-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.money-amount {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.money-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+
+.money-actions a {
+    color: white;
+    text-decoration: underline;
+}
+
+.money-actions a:hover {
+    opacity: 0.8;
+}

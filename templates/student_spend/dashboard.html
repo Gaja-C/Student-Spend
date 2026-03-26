@@ -3,16 +3,45 @@
 {% block titleblock %}Dashboard{% endblock %}
 
 {% block nav_block %}{% endblock %}
+{% block money_block %}{% endblock %}
 
 {% block content %}
-<h1>Dashboard</h1>
-<p>
-    <ul>
-    <li><a href="{% url 'student_spend:expenses' %}">Expenses</a></li>
-    <li><a href="{% url 'student_spend:bill_splitting' %}">Bill splitting</a></li>
-    <li><a href="{% url 'student_spend:budget' %}">Budget</a></li>
-    <li><a href="{% url 'student_spend:index' %}">Return to the homepage.</a></li>
-    <li><a href="{% url 'student_spend:logout' %}">Logout</a></li>
-    </ul>
-</p>
+<section class="landing-page">
+    <div class="hero-card">
+
+        <h1 class="hero-title">Dashboard</h1>
+        <p class="hero-subtitle">Manage your finances</p>
+
+        <div class="dashboard-grid-modern">
+            <div class="dashboard-info-card">
+                <div class="money-content">
+                    <span class="money-amount">Money: £{{ user.userprofile.money }}</span>
+
+                    <div class="money-actions">
+                        <a href="{% url 'student_spend:add_money' %}">Add Money</a>
+                        <a href="{% url 'student_spend:remove_money' %}">Remove Money</a>
+                    </div>
+                </div>
+            </div>
+
+            <a class="dashboard-action-card" href="{% url 'student_spend:bill_splitting' %}">
+                Bill Splitting
+            </a>
+
+            <a class="dashboard-action-card" href="{% url 'student_spend:expenses' %}">
+                Expense<br>Management
+            </a>
+
+            <a class="dashboard-action-card" href="{% url 'student_spend:budget' %}">
+                Budget Tracking
+            </a>
+        </div>
+
+        <div class="dashboard-footer-links">
+            <a href="{% url 'student_spend:index' %}">Return to homepage</a>
+            <a href="{% url 'student_spend:logout' %}">Logout</a>
+        </div>
+
+    </div>
+</section>
 {% endblock %}

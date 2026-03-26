@@ -3,21 +3,33 @@
 {% block titleblock %}Remove Money{% endblock %}
 
 {% block nav_block %}{% endblock %}
+{% block money_block %}{% endblock %}
 
 {% block content %}
-<h1>Remove Money</h1>
-<p>Current Money: £{{ user.userprofile.money }}</p>
-<form method="post" action=".">
-    {% csrf_token %}
-    Pounds: <input type="number" name="pounds" size="50" step="1" min="0"/><br />
-    Pence: <input type="number" name="pence" size="50" step="1" min="0" max="99"/><br />
-    <input type="submit" value="Remove Money"><br />
-    {% if next %}
-        <input type="hidden" name="next" value="{{ next }}">
-    {% endif %}
-</form>
+<section class="landing-page">
+    <div class="hero-card">
 
-<a href="{% url 'student_spend:index' %}">Return to the homepage.</a>
+        <h1 class="hero-title">Remove Money</h1>
+        <p class="hero-subtitle">Current balance: £{{ user.userprofile.money }}</p>
+
+        <form method="post" action="." class="login-form">
+            {% csrf_token %}
+
+            <input type="number" name="pounds" placeholder="Pounds" step="1" min="0" required>
+            <input type="number" name="pence" placeholder="Pence" step="1" min="0" max="99" required>
+
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <button type="submit" class="btn">Remove Money</button>
+        </form>
+
+        <p class="form-links">
+            <a href="{% url 'student_spend:dashboard' %}">Return to dashboard</a><br>
+            <a href="{% url 'student_spend:index' %}">Return to homepage</a>
+        </p>
+
+    </div>
+</section>
 {% endblock %}
-
-{% block money_block %}{% endblock %}
