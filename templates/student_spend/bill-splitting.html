@@ -28,7 +28,11 @@
     {% csrf_token %}
     <input type="hidden" name="action" value="add_member">
     Username: <input type="text" name="membersUsername" size="50"/><br />
-    Group Name: <input type="text" name="groupName" size="50"/><br />
+    Group Name: <select name="groupName" id="selectGroup">
+        {% for group in groups %}
+            <option value = "{{group.group_name_for_user}}">{{ group.group_name_for_user }} </option>
+        {% endfor %}
+    </select><br/> 
     <input type="submit" value="Add Member"><br />
 </form>
 <hr>
@@ -37,7 +41,11 @@
     {% csrf_token %}
     <input type="hidden" name="action" value="remove_member">
     Username: <input type="text" name="membersUsername" size="50"/><br />
-    Group Name: <input type="text" name="groupName" size="50"/><br />
+    Group Name: <select name="groupName" id="selectGroup">
+        {% for group in groups %}
+            <option value = "{{group.group_name_for_user}}">{{ group.group_name_for_user }} </option>
+        {% endfor %}
+    </select><br/> 
     <input type="submit" value="Remove Member"><br />
 </form>
 <hr>
@@ -45,7 +53,11 @@
     <p>Delete Group</p>
     {% csrf_token %}
     <input type="hidden" name="action" value="delete_group">
-    Group Name: <input type="text" name="groupName" size="50"/><br />
+    Group Name: <select name="groupName" id="selectGroup">
+        {% for group in groups %}
+            <option value = "{{group.group_name_for_user}}">{{ group.group_name_for_user }} </option>
+        {% endfor %}
+    </select><br/> 
     <input type="submit" value="Delete Group"><br />
 </form>
 <hr>
@@ -53,7 +65,11 @@
     <p>Add Transaction</p>
     {% csrf_token %}
     <input type="hidden" name="action" value="add_transaction">
-    Group Name: <input type="text" name="groupName" size="50"/><br />
+    Group Name: <select name="groupName" id="selectGroup">
+        {% for group in groups %}
+            <option value = "{{group.group_name_for_user}}">{{ group.group_name_for_user }} </option>
+        {% endfor %}
+    </select><br/> 
     Transaction: <input type="number" name="transaction" size="50" step="0.01" min="0"/><br />
     <input type="submit" value="Add Transaction"><br />
 </form>

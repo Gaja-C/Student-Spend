@@ -10,6 +10,7 @@ from decimal import Decimal
 from django.contrib import messages
 from .models import ExpenseCategory, Expense ,MemberOfGroup,Group, Goal
 from datetime import date, datetime
+import json
 
 # Create your views here.
 def index(request):
@@ -74,7 +75,9 @@ def budget(request):
         if action == "add_goal":
             goalName = request.POST.get("goalName")
             date = request.POST.get("date")
-            if (Goal.objects.filter(user=profile, name=goalName).exists()):
+            if (not date):
+                messages.error(request, "Please enter a date.")
+            elif (Goal.objects.filter(user=profile, name=goalName).exists()):
                 messages.error(request, "Goal of same name already exists. Please give this goal a more unique name")
             else:
                 budget = request.POST.get("amount")
@@ -111,13 +114,6 @@ def dashboard(request):
 @login_required 
 def expenses(request):
     profile = request.user.userprofile
-    categories = ExpenseCategory.objects.filter(user=profile).order_by('lastAddedTo').values().reverse()
-    categories = categories[:3]
-    mostRecentData = []
-    for category in categories:
-        microExpenses = Expense.objects.filter(user=profile, category_id = category['id']).order_by('date').values().reverse()
-        microExpenses = microExpenses[:3]
-        mostRecentData.append({'category' : category, 'expenses' : microExpenses})
 
     if request.method == 'POST':
         action = request.POST.get("action")
@@ -140,7 +136,9 @@ def expenses(request):
             amount = request.POST.get('amount')
             dateOf = request.POST.get('date')
             category = ExpenseCategory.objects.filter(user=profile, name=categoryName)
-            if category.exists():
+            if (not dateOf):
+                messages.error(request, "Please enter a date.")
+            elif category.exists():
                 if (Expense.objects.filter(user=profile, name=expenseName, category=category.get(), date=dateOf).exists()):
                     messages.error(request, "Expense of same name and date already exists in chosen category.")
                 else:
@@ -152,14 +150,27 @@ def expenses(request):
             categoryName = request.POST.get('categoryName')
             dateOf = request.POST.get('date')
             category = ExpenseCategory.objects.filter(user=profile, name=categoryName)
-            if category.exists():
+            if (not dateOf):
+                messages.error(request, "Please enter a date.")
+            elif category.exists():
                 if (Expense.objects.filter(user=profile, name=expenseName, category=category.get(), date=dateOf).exists()):
                     Expense.objects.filter(user=profile, name=expenseName, category=category.get(), date=dateOf).delete()
                 else:
                     messages.error(request, "Chosen expense does not exist.")
             else:
                 messages.error(request, "Chosen category does not exist.")
-    return render(request, 'student_spend/expenses.html', {'mostRecentData' : mostRecentData},)
+    categories = ExpenseCategory.objects.filter(user=profile).order_by('lastAddedTo').values().reverse()
+    allData = []
+    for category in categories:
+        microExpenses = Expense.objects.filter(user=profile, category_id = category['id']).order_by('date').values().reverse()
+        allData.append({'category' : category, 'expenses' : microExpenses})
+    categories = categories[:3]
+    mostRecentData = []
+    for category in categories:
+        microExpenses = Expense.objects.filter(user=profile, category_id = category['id']).order_by('date').values().reverse()
+        microExpenses = microExpenses[:3]
+        mostRecentData.append({'category' : category, 'expenses' : microExpenses})
+    return render(request, 'student_spend/expenses.html', {'mostRecentData' : mostRecentData, 'allData' : allData},)
 
 @login_required 
 def bill_splitting(request):
@@ -246,25 +257,28 @@ def bill_splitting(request):
             nameForGroup = request.POST.get('groupName')
             groupTransaction = Decimal(request.POST.get('transaction')) 
 
-            if (groupTransaction):
+            if (groupTransaction > 0):
                 memberOfGroup= MemberOfGroup.objects.get(user=profile, group_name_for_user = nameForGroup)
                 moneyForT= Group.objects.get(id=memberOfGroup.group_id)
                 if (moneyForT.money_per_user <= groupTransaction):
                     memberOfGroup.paid_off = True
                 memberOfGroup.money_spent = memberOfGroup.money_spent + groupTransaction
-                memberOfGroup.lastPayment = datetime.now
+                memberOfGroup.lastPayment = datetime.now()
                 memberOfGroup.save()
+            else:
+                messages.error(request, "Please enter a transaction")
 
+    groups = MemberOfGroup.objects.filter(user=profile).order_by('group_name_for_user')
     memberG = MemberOfGroup.objects.filter(user=profile, paid_off = False).order_by('group_name_for_user').values().reverse()
     memberG = memberG[:5]
     mostRecentData = []
     for memberGroup in memberG:
         group = Group.objects.get(id=memberGroup['group_id'])
         otherMembers = MemberOfGroup.objects.filter(group_id=memberGroup['group_id']).exclude(user=profile)
-        mostRecentData.append({'name' : memberGroup['group_name_for_user'], 'money_spent' : memberGroup['money_spent'], 'money_per_user' : group.money_per_user, 'other_members' : otherMembers})
+        mostRecentData.append({'name' : memberGroup['group_name_for_user'], 'money_spent' : memberGroup['money_spent'], 'money_per_user' : group.money_per_user, 'other_members' : otherMembers,})
 
 
-    return render(request, 'student_spend/bill-splitting.html', {'mostRecentData' : mostRecentData},)
+    return render(request, 'student_spend/bill-splitting.html', {'mostRecentData' : mostRecentData, 'groups' : groups,},)
 
 def addMember(userProfile, group, groupName):
     alsoMemberIn=MemberOfGroup.objects.filter(user=userProfile, paid_off = False ).order_by('lastPayment').values().reverse() 
