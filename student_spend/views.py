@@ -18,9 +18,6 @@ import json
 def index(request):
     return render(request, 'student_spend/index.html')
 
-def about(request):
-    return HttpResponse("Rango says here is the about page. </br><a href='/student_spend/'>Index</a>") # was not sure to change this to student_spend aswell 
-
 def registration(request):
     registered = False
 
@@ -57,10 +54,10 @@ def user_login(request):
                 login(request, user)
                 return redirect(reverse('student_spend:index'))
             else:
-                return HttpResponse("Your Student_spend account is disabled.")
+                messages.error(request, "Your Student_spend account is disabled.")
         else:
             print(f"Invalid login details: {username}, {password}")
-            return HttpResponse("Invalid login details supplied.")
+            messages.error(request, "Invalid login details supplied.")
     else:
         return render(request, 'student_spend/login.html')
 
@@ -335,7 +332,7 @@ def add_money(request):
             profile.save()
             return redirect(reverse('student_spend:dashboard'))
         except:
-            return HttpResponse("Invalid input supplied.")
+            messages.error(request, "Invalid input supplied.")
     return render(request, 'student_spend/add-money.html')
 
 @login_required
