@@ -14,13 +14,13 @@ Student-Spend is designed to help students manage finances.
 It allows them to track budgeting, expenses, bill splitting and goals
 
 ## Features
-User registration
-Login system
-Add and remove money
-Track expense by category
-Set and manage financial goals
-Split bills between users
-Group management for shared expenses
+- User registration
+- Login system
+- Add and remove money
+- Track expense by category
+- Set and manage financial goals
+- Split bills between users
+- Group management for shared expenses
 
 ## External Sources
 - https://www.w3schools.com/jsref/met_win_confirm.asp
@@ -43,3 +43,7 @@ Group management for shared expenses
 - https://www.geeksforgeeks.org/python/json-dumps-in-python/
 - https://www.w3schools.com/xml/ajax_xmlhttprequest_send.asp
 - https://stackoverflow.com/questions/17478731/whats-the-point-of-the-x-requested-with-header
+- https://www.geeksforgeeks.org/python/how-to-efficiently-delete-a-record-in-django/
+- https://stackoverflow.com/questions/16925129/generate-unique-id-in-django-from-a-model-field
+- https://docs.djangoproject.com/en/6.0/topics/db/models/
+- https://docs.djangoproject.com/en/6.0/ref/models/fields/

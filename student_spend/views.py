@@ -86,11 +86,10 @@ def budget(request):
                 Goal.objects.create(user=profile, name=goalName, budget=budget, current_amount=0, date=date)
         elif action == "remove_goal":
             goalName = request.POST.get("goalName")
-            date = request.POST.get("date")
-            if (not(Goal.objects.filter(user=profile, name=goalName, date=date).exists())):
-                messages.error(request, "Goal of entered name and date does not exist. Could not remove this goal.")
+            if (not(Goal.objects.filter(user=profile, name=goalName).exists())):
+                messages.error(request, "Goal of entered name does not exist. Could not remove this goal.")
             else:
-                Goal.objects.get(user=profile, name=goalName, date=date).delete()
+                Goal.objects.get(user=profile, name=goalName).delete()
         elif action == "edit_goal":
             goalName = request.POST.get("goalName")
             addOrSub = Decimal(request.POST.get("amount"))
@@ -182,10 +181,11 @@ def bill_splitting(request):
         if action == "add_group":
             userCreatedGroupName = request.POST.get('userCreatedGroupName')
             moneySpent = Decimal(request.POST.get('moneySpent'))
-            if (MemberOfGroup.objects.filter(user=profile, group_name_for_user = userCreatedGroupName).exists()):
+            if (MemberOfGroup.objects.filter(user=profile, paid_off=False, group_name_for_user = userCreatedGroupName).exists()):
                 messages.error(request, "Group of same name already exists.")
             else:
                 groupmembers = request.POST.getlist('members')
+                groupmembers = [username.strip() for username in groupmembers]
                 moneyPerUser = (moneySpent / Decimal(len(groupmembers)+1)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
   
                 #Check all fields are valid before making group
@@ -301,10 +301,10 @@ def bill_splitting(request):
     return render(request, 'student_spend/bill-splitting.html', {'mostRecentData' : mostRecentData, 'groups' : groups,},)
 
 def addMember(userProfile, group, groupName):
-    alsoMemberIn=MemberOfGroup.objects.filter(user=userProfile, paid_off = False ).order_by('lastPayment').values().reverse() 
+    alsoMemberIn=MemberOfGroup.objects.filter(user=userProfile, paid_off = False).order_by('lastPayment').values().first()
     membersNameForGroup=groupName
-    if alsoMemberIn and (alsoMemberIn['group_name_for_user'] == groupName):
-        if (membersNameForGroup[-1].isDigit()):
+    if alsoMemberIn and (MemberOfGroup.objects.filter(user=userProfile,paid_off=False,group_name_for_user=membersNameForGroup).exists()):
+        if (membersNameForGroup[-1].isdigit()):
             membersNameForGroup=checkNumber(membersNameForGroup, -1)
         else:
             membersNameForGroup=membersNameForGroup+"1"
