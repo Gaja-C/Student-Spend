@@ -11,6 +11,8 @@ from django.contrib import messages
 from .models import ExpenseCategory, Expense ,MemberOfGroup,Group, Goal
 from datetime import date, datetime
 from django.http import JsonResponse
+from decimal import Decimal, ROUND_HALF_UP
+import json
 
 # Create your views here.
 def index(request):
@@ -184,20 +186,23 @@ def bill_splitting(request):
                 messages.error(request, "Group of same name already exists.")
             else:
                 groupmembers = request.POST.getlist('members')
-                moneyPerUser=moneySpent/Decimal(len(groupmembers)+1)
-
+                moneyPerUser = (moneySpent / Decimal(len(groupmembers)+1)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+  
                 #Check all fields are valid before making group
+                allgood= True
                 for memberUsername in groupmembers:# is there a sepreate user id or id it onley the username
                     if (not(User.objects.filter(username=memberUsername).exists())):
                         messages.error(request, "User, " + memberUsername +", does not exist. Could not make group")
-                    else:
-                        new_group=Group.objects.create(name=userCreatedGroupName, money_per_user=moneyPerUser, total_money=moneySpent)
-                        MemberOfGroup.objects.create(user=profile, group=new_group,group_name_for_user=userCreatedGroupName, groupAdmin=True)
-                        for memberUsername in groupmembers:
-                            userMember = User.objects.filter(username=memberUsername)
-                            userMemberProfile = UserProfile.objects.get(user=userMember.get())
-                            addMember(userMemberProfile, new_group, userCreatedGroupName)
-        
+                        allgood =False
+                if (allgood):
+                    new_group=Group.objects.create(name=userCreatedGroupName, money_per_user=moneyPerUser, total_money=moneySpent)
+                    MemberOfGroup.objects.create(user=profile, group=new_group,group_name_for_user=userCreatedGroupName, groupAdmin=True)
+                    for memberUsername in groupmembers:
+                        userMember = User.objects.filter(username=memberUsername)
+                        userMemberProfile = UserProfile.objects.get(user=userMember.get())
+                        addMember(userMemberProfile, new_group, userCreatedGroupName)
+                       
+            
         elif action == "add_member": #we need to ad a way to get the user ID from the username dodnt know if it works
             memberUsername = request.POST.get('membersUsername')
             groupName = request.POST.get('groupName')
@@ -217,7 +222,7 @@ def bill_splitting(request):
                     messages.error(request, memberUsername + " is already in " + groupName +". Could npt add to group")
                 else:
                     addMember(userMemberProfile, memberGroup, groupName)
-                    memberGroup.money_per_user = memberGroup.total_money / Decimal(memberGroup.numberOfUsers)
+                    memberGroup.money_per_user = (memberGroup.total_money / Decimal(memberGroup.numberOfUsers)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
                     memberGroup.save()
 
         elif action == "remove_member":
@@ -234,14 +239,31 @@ def bill_splitting(request):
             else:
                 userMember = User.objects.filter(username=memberUsername)
                 userMemberProfile = UserProfile.objects.get(user=userMember.get())
-                memberGroup = MemberOfGroup.objects.get(user=profile, group_name_for_user=groupName).group
+                membership = MemberOfGroup.objects.get(user=profile, group_name_for_user=groupName)
+                memberGroup = membership.group
+
                 if (not(MemberOfGroup.objects.filter(user=userMemberProfile, group=memberGroup).exists())):
-                    messages.error(request, memberUsername + " is not in " + groupName +". Could not remove for group")
+                    messages.error(request, memberUsername + " is not in " + groupName + ". Could not remove from group")
+
                 else:
-                    MemberOfGroup.objects.filter(user=userMemberProfile, group=memberGroup).delete()
-                    memberGroup.numberOfUsers -= 1
-                    memberGroup.money_per_user = memberGroup.total_money / Decimal(memberGroup.numberOfUsers)
-                    memberGroup.save()
+                    targetMembership = MemberOfGroup.objects.get(user=userMemberProfile, group=memberGroup)
+                    isAdmin = targetMembership.groupAdmin
+                    targetMembership.delete()
+                    remainingMembers = MemberOfGroup.objects.filter(group=memberGroup)
+                    remainingCount = remainingMembers.count()
+
+                    if (remainingCount == 0):# if no members left -> delete group
+                        memberGroup.delete()
+                    else:
+                        if (isAdmin):#group needs an admin
+                            newAdmin = remainingMembers.first()
+                            newAdmin.groupAdmin = True
+                            newAdmin.save()
+
+                        memberGroup.numberOfUsers = remainingCount
+                        memberGroup.money_per_user = (memberGroup.total_money / Decimal(remainingCount)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                        memberGroup.save()
+                
 
         elif action == "delete_group":
             groupName = request.POST.get('groupName')
@@ -289,6 +311,7 @@ def addMember(userProfile, group, groupName):
     MemberOfGroup.objects.create(user=userProfile,group=group,group_name_for_user=membersNameForGroup)
     group.numberOfUsers = group.numberOfUsers + 1
     group.save()
+
 
 def checkNumber(string, numberChecker):
     if (string[numberChecker-1].isdigit() and int(string[numberChecker]) == 9):
