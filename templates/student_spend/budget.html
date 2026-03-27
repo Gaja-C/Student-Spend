@@ -65,7 +65,7 @@
 
             <div class="budget-panel">
                 <h2>Edit Goal</h2>
-                <form id="editGoal" method="post" action="." class="budget-form">
+                <form id="editGoal" method="post" action="." class="budget-form" data-url="{% url 'student_spend:edit_goal' %}">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="edit_goal">
 
@@ -115,4 +115,5 @@
 {% endblock %}
 {% block scripts %}
 <script src="{% static 'js/budget.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 {% endblock %}

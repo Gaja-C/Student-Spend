@@ -10,7 +10,7 @@ from decimal import Decimal
 from django.contrib import messages
 from .models import ExpenseCategory, Expense ,MemberOfGroup,Group, Goal
 from datetime import date, datetime
-import json
+from django.http import JsonResponse
 
 # Create your views here.
 def index(request):
@@ -190,13 +190,13 @@ def bill_splitting(request):
                 for memberUsername in groupmembers:# is there a sepreate user id or id it onley the username
                     if (not(User.objects.filter(username=memberUsername).exists())):
                         messages.error(request, "User, " + memberUsername +", does not exist. Could not make group")
-                else:
-                    new_group=Group.objects.create(name=userCreatedGroupName, money_per_user=moneyPerUser, total_money=moneySpent)
-                    MemberOfGroup.objects.create(user=profile, group=new_group,group_name_for_user=userCreatedGroupName, groupAdmin=True)
-                    for memberUsername in groupmembers:
-                        userMember = User.objects.filter(username=memberUsername)
-                        userMemberProfile = UserProfile.objects.get(user=userMember.get())
-                        addMember(userMemberProfile, new_group, userCreatedGroupName)
+                    else:
+                        new_group=Group.objects.create(name=userCreatedGroupName, money_per_user=moneyPerUser, total_money=moneySpent)
+                        MemberOfGroup.objects.create(user=profile, group=new_group,group_name_for_user=userCreatedGroupName, groupAdmin=True)
+                        for memberUsername in groupmembers:
+                            userMember = User.objects.filter(username=memberUsername)
+                            userMemberProfile = UserProfile.objects.get(user=userMember.get())
+                            addMember(userMemberProfile, new_group, userCreatedGroupName)
         
         elif action == "add_member": #we need to ad a way to get the user ID from the username dodnt know if it works
             memberUsername = request.POST.get('membersUsername')
@@ -354,7 +354,25 @@ def view_all_groups(request):
         allData.append({'name' : memberGroup['group_name_for_user'], 'money_spent' : memberGroup['money_spent'], 'money_per_user' : group.money_per_user, 'other_members' : otherMembers,})
     return render(request, 'student_spend/view-all-groups.html', {'allData' : allData},)
 
+@login_required
 def view_all_budgets(request):
     profile = request.user.userprofile
     allData = Goal.objects.filter(user=profile).order_by('date').values()
     return render(request, 'student_spend/view-all-budgets.html', {'allData' : allData},)
+
+@login_required
+def edit_goal(request):
+    profile = request.user.userprofile
+    goalName = request.POST.get("goalName")
+    addOrSub = Decimal(request.POST.get("amount"))
+    goal = Goal.objects.get(user=profile, name=goalName)
+    total = goal.current_amount + addOrSub
+    if total < 0:
+        return JsonResponse({"success" : False, "message": "Cannot remove more money than possible. Please enter a valid value to subtract"})
+    if total >= goal.budget:
+        goal.delete()
+        return JsonResponse({"success" : True, "deleted" : True})
+    goal.current_amount = total
+    goal.save()
+    progress = float((goal.current_amount / goal.budget) * 100)
+    return JsonResponse({"success":True, "deleted" : False, "current_amount" : goal.current_amount, "progress":progress})

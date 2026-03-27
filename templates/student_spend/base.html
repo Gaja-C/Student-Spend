@@ -13,9 +13,7 @@
 <main>
     {% if messages %}
         {% for message in messages %}
-                <script>
-                    <div message="{{message}}"></div>
-                </script>
+            <div data-message="{{message}}"></div>
         {% endfor %}
     {% endif %}
 

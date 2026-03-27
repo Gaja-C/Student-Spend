@@ -18,4 +18,5 @@ urlpatterns = [
     path('view_all_expenses/', views.view_all_expenses, name="view_all_expenses"),
     path('view_all_groups/', views.view_all_groups, name="view_all_groups"),
     path('view_all_budgets/', views.view_all_budgets, name="view_all_budgets"),
+    path('budget/edit-goal/', views.edit_goal, name="edit_goal"),
 ]
