@@ -47,3 +47,4 @@ It allows them to track budgeting, expenses, bill splitting and goals
 - https://stackoverflow.com/questions/16925129/generate-unique-id-in-django-from-a-model-field
 - https://docs.djangoproject.com/en/6.0/topics/db/models/
 - https://docs.djangoproject.com/en/6.0/ref/models/fields/
+- Book: Tango With Django 2 A beginner’s guide to web development with Django 2. Author: Leif Azzopardi and David Maxwell
