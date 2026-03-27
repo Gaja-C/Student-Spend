@@ -1,0 +1,44 @@
+{% extends "student_spend/base.html" %}
+
+{% block titleblock %}All Groups{% endblock %}
+
+{% block nav_block %}{% endblock %}
+{% block money_block %}{% endblock %}
+
+{% block content %}
+<section class="landing-page">
+    <div class="hero-card all-expenses-card-layout">
+
+        <h1 class="hero-title">All Groups</h1>
+        <p class="hero-subtitle">View every group and member</p>
+
+        <div class="all-expenses-panel">
+            {% for item in allData %}
+                <div class="expense-category-card">
+                    <h3>{{ item.name }}</h3>
+                    <span class="pill">£{{ item.money_spent }}</span>
+
+                    <p><strong>Your split:</strong> {{ item.money_per_user }}</p>
+                    <p><strong>Other members:</strong></p>
+                    <ul>
+                    {% for member in item.other_members %}
+                        <li>{{ member.user.user.username }}</li>
+                    {% empty %}
+                        <li>No other members in this group.</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                {% empty %}
+                    <p class="empty-state">No groups yet.</p>
+                {% endfor %}
+        </div>
+
+            <div class="dashboard-footer-links">
+                <a href="{% url 'student_spend:dashboard' %}">Return to dashboard</a>
+                <a href="{% url 'student_spend:groups' %}">Return to groups</a>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

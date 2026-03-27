@@ -1,100 +1,118 @@
 {% extends "student_spend/base.html" %}
+{% load static %}
 
 {% block titleblock %}Budget Tracking{% endblock %}
 
 {% block nav_block %}{% endblock %}
+{% block money_block %}{% endblock %}
 
 {% block content %}
-<h1>Budget Tracking</h1>
-<p>
-    Current Money: £{{ user.userprofile.money }}</br>
-</p>
-<hr>
-<form method="post" action=".">
-    <p>Add Goal</p>
-    {% csrf_token %}
-    <input type="hidden" name="action" value="add_goal">
-    Goal Name: <input type="text" name="goalName" size="50"/><br />
-    Amount: <input type="number" name="amount" size="50" step="0.01" min="0"/><br />
-    Date: <input type="date" name="date" size="50"/><br />
-    <input type="submit" value="Add Goal"><br />
-</form>
-<hr>
-<form method="post" action="." onsubmit="return confirmDeleteGoal()">
-    <p>Remove Goal</p>
-    {% csrf_token %}
-    <input type="hidden" name="action" value="remove_goal">
-    Goal Name: <select name="goalName", id="removeGoal">
-        {% for goal in goals %}
-            <option value = "{{goal.id}}">{{ goal.name }} </option>
-        {% endfor %}
-    </select></br>
-    <input type="submit" value="Remove Goal"><br />
-</form>
-<hr>
-<form id = "editGoal" method="post" action=".">
-    <p>Edit Goal</p>
-    {% csrf_token %}
-    <input type="hidden" name="action" value="edit_goal">
-    Goal Name: <select name="goalName" id="selectGoal">
-        {% for goal in goals %}
-            <option value = "{{goal.name}}" budget = "{{ goal.budget }}" currentAmount = "{{ goal.current_amount }}">{{ goal.name }} </option>
-        {% endfor %}
-    </select>
-    <p>Amount Saved</p>
-    <div style="width:100px; height:15px; border:1px solid black; background:#eee;">
-    <div id="progressBar" style="width: 0%; height:100%; background:red;"></div>
-    </div> 
-    Add/Remove Money: <input id="addOrSub" type="number" name="amount" size="50" step="0.01"/><br />
-    <input type="submit" value="Edit Goal"><br />
-</form>
-<hr>
+<section class="landing-page">
+    <div class="hero-card budget-card-layout">
 
-<h2>Goals Coming Up:</h2>
+        <div class="page-header">
+            <h1 class="hero-title">Budget Tracking</h1>
+            <p class="hero-subtitle">Track savings goals and manage your progress</p>
+        </div>
 
-{% for item in mostRecentData %}
-    <h3>{{ item.name }}</h3>
-    <p>Due by {{item.date}}</p>
-{% empty %}
-    <p>No goals yet.</p>
-{% endfor %}
-<a href="{% url 'student_spend:view_all_expenses' %}">View all.</a></br>
-<a href="{% url 'student_spend:dashboard' %}">Return to the dashboard.</a>
+        <div class="budget-top-grid">
+            <div class="budget-panel featured-panel">
+                <h2>Add Goal</h2>
+                <form method="post" action="." class="budget-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_goal">
 
-<script>
-function confirmDeleteGoal() {
-    return confirm("Are you sure you want to delete this goal?\n");
-}
+                    <input type="text" name="goalName" placeholder="Goal Name" required>
+                    <input type="number" name="amount" placeholder="Target Amount" step="0.01" min="0" required>
+                    <input type="date" name="date" required>
 
-const selectGoal = document.getElementById("selectGoal")
-const progressBar = document.getElementById("progressBar")
-function updateProgress() {
-    const selectedOption = selectGoal.options[selectGoal.selectedIndex];
-    const budget = parseFloat(selectedOption.getAttribute("budget"));
-    const currentAmount = parseFloat(selectedOption.getAttribute("currentAmount"));
-    const progress = (currentAmount/budget)*100;
+                    <button type="submit" class="btn">Add Goal</button>
+                </form>
+            </div>
 
-    progressBar.style.width = progress + "%";
-}
-updateProgress()
-selectGoal.addEventListener("change", updateProgress)
+            <div class="budget-money-column">
+                <div class="dashboard-info-card budget-money-box">
+                    <span class="money-label">Available Money</span>
+                    <strong>£{{ user.userprofile.money }}</strong>
+                </div>
 
-const editGoal = document.getElementById('editGoal')
-const amountInput = document.querySelector('input[id="addOrSub"]')
-editGoal.addEventListener('submit', function(e) {
-    const selectedOption = selectGoal.options[selectGoal.selectedIndex];
-    const budget = parseFloat(selectedOption.getAttribute("budget"));
-    const currentAmount = parseFloat(selectedOption.getAttribute("currentAmount"));
-    const addOrSub = parseFloat(amountInput.value || 0);
-    const total = currentAmount + addOrSub;
-    if (total >= budget) {
-        const confirmed = confirm("You are about to meet the budget for this goal. Doing this will remove the goal. Are you sure you want to do this?\n");
-    }
-    if (!confirmed) {
-        e.preventDefault()
-    }
-});
-</script>
+                <div class="quick-links-card">
+                    <h3>Quick Links</h3>
+                    <div class="dashboard-footer-links compact-links">
+                        <a href="{% url 'student_spend:view_all_budgets' %}">View all budgets</a>
+                        <a href="{% url 'student_spend:dashboard' %}">Return to dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="budget-middle-grid">
+            <div class="budget-panel danger-panel">
+                <h2>Remove Goal</h2>
+                <form method="post" action="." class="budget-form" onsubmit="return confirmDeleteGoal()">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="remove_goal">
+
+                    <select name="goalName" id="removeGoal" required>
+                        {% for goal in goals %}
+                            <option value="{{ goal.id }}">{{ goal.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit" class="btn btn-danger-soft">Remove Goal</button>
+                </form>
+            </div>
+
+            <div class="budget-panel">
+                <h2>Edit Goal</h2>
+                <form id="editGoal" method="post" action="." class="budget-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="edit_goal">
+
+                    <select name="goalName" id="selectGoal" required>
+                        {% for goal in goals %}
+                            <option value="{{ goal.name }}" budget="{{ goal.budget }}" currentAmount="{{ goal.current_amount }}">
+                                {{ goal.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <div class="progress-wrapper">
+                        <p class="progress-label">Current Progress</p>
+                        <div class="progress-outer">
+                            <div id="progressBar" class="progress-inner"></div>
+                        </div>
+                    </div>
+
+                    <input id="addOrSub" type="number" name="amount" placeholder="Add or Remove Money" step="0.01">
+
+                    <button type="submit" class="btn">Update Goal</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="budget-panel upcoming-goals-panel">
+            <div class="section-header">
+                <h2>Goals Coming Up</h2>
+                <span class="section-badge">{{ mostRecentData|length }} goal{{ mostRecentData|length|pluralize }}</span>
+            </div>
+
+            {% for item in mostRecentData %}
+                <div class="goal-card">
+                    <div class="recent-group-top">
+                        <h3>{{ item.name }}</h3>
+                        <span class="pill">£{{ item.budget }}</span>
+                    </div>
+                    <p>Due by {{ item.date }}</p>
+                </div>
+            {% empty %}
+                <p class="empty-state">No goals yet.</p>
+            {% endfor %}
+        </div>
+
+    </div>
+</section>
 {% endblock %}
-
-{% block money_block %}{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/budget.js' %}"></script>
+{% endblock %}

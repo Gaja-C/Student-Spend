@@ -14,7 +14,7 @@
     {% if messages %}
         {% for message in messages %}
                 <script>
-                    alert("{{message}}")
+                    <div message="{{message}}"></div>
                 </script>
         {% endfor %}
     {% endif %}
@@ -60,5 +60,7 @@
 <footer>
     <p>&copy; {{ year|default:2026 }} StudentSpend</p>
 </footer>
+<script src="{% static 'js/base.js' %}"></script>
+{% block scripts %}{% endblock %}
 </body>
 </html>

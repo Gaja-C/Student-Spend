@@ -268,7 +268,7 @@ def bill_splitting(request):
             else:
                 messages.error(request, "Please enter a transaction")
 
-    groups = MemberOfGroup.objects.filter(user=profile).order_by('group_name_for_user')
+    groups = MemberOfGroup.objects.filter(user=profile, paid_off = False).order_by('group_name_for_user')
     memberG = MemberOfGroup.objects.filter(user=profile, paid_off = False).order_by('group_name_for_user').values().reverse()
     memberG = memberG[:5]
     mostRecentData = []
@@ -276,8 +276,6 @@ def bill_splitting(request):
         group = Group.objects.get(id=memberGroup['group_id'])
         otherMembers = MemberOfGroup.objects.filter(group_id=memberGroup['group_id']).exclude(user=profile)
         mostRecentData.append({'name' : memberGroup['group_name_for_user'], 'money_spent' : memberGroup['money_spent'], 'money_per_user' : group.money_per_user, 'other_members' : otherMembers,})
-
-
     return render(request, 'student_spend/bill-splitting.html', {'mostRecentData' : mostRecentData, 'groups' : groups,},)
 
 def addMember(userProfile, group, groupName):
@@ -345,3 +343,18 @@ def view_all_expenses(request):
         microExpenses = Expense.objects.filter(user=profile, category_id = category['id']).order_by('date').values().reverse()
         allData.append({'category' : category, 'expenses' : microExpenses})
     return render(request, 'student_spend/view-all-expenses.html', {'allData' : allData},)
+
+def view_all_groups(request):
+    profile = request.user.userprofile
+    memberG = MemberOfGroup.objects.filter(user=profile, paid_off = False).order_by('group_name_for_user').values().reverse()
+    allData = []
+    for memberGroup in memberG:
+        group = Group.objects.get(id=memberGroup['group_id'])
+        otherMembers = MemberOfGroup.objects.filter(group_id=memberGroup['group_id']).exclude(user=profile)
+        allData.append({'name' : memberGroup['group_name_for_user'], 'money_spent' : memberGroup['money_spent'], 'money_per_user' : group.money_per_user, 'other_members' : otherMembers,})
+    return render(request, 'student_spend/view-all-groups.html', {'allData' : allData},)
+
+def view_all_budgets(request):
+    profile = request.user.userprofile
+    allData = Goal.objects.filter(user=profile).order_by('date').values()
+    return render(request, 'student_spend/view-all-budgets.html', {'allData' : allData},)

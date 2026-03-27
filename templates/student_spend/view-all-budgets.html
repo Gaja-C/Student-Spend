@@ -1,0 +1,36 @@
+{% extends "student_spend/base.html" %}
+
+{% block titleblock %}All Budgets{% endblock %}
+
+{% block nav_block %}{% endblock %}
+{% block money_block %}{% endblock %}
+
+{% block content %}
+<section class="landing-page">
+    <div class="hero-card all-expenses-card-layout">
+
+        <h1 class="hero-title">All Budgets</h1>
+        <p class="hero-subtitle">View all your saving goals</p>
+
+        <div class="all-expenses-panel">
+            {% for item in allData %}
+                <div class="expense-category-card">
+                    <h3>{{ item.name }}</h3>
+                    <span class="pill">£{{ item.budget }}</span>
+
+                    <p>Due by {{ item.date }}</p>
+                </div>
+                {% empty %}
+                    <p class="empty-state">No groups yet.</p>
+                {% endfor %}
+        </div>
+
+            <div class="dashboard-footer-links">
+                <a href="{% url 'student_spend:dashboard' %}">Return to dashboard</a>
+                <a href="{% url 'student_spend:budget' %}">Return to budgeting</a>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
